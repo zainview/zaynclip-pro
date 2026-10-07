@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+  <style>
+    html, body { height: 100%; }
+    body { width: 100% !important; display: flex; flex-direction: column; overflow: hidden; }
+    #appMain { display: flex; flex-direction: column; height: 100%; }
+    #list { flex: 1; max-height: none; }
+  </style>
+</head>
+<body>
+  <div id="lockScreen">
+    <div class="lock-icon">🔒</div>
+    <div class="lock-title">CLIPBOARD LOCKED</div>
+    <input id="lockPass" type="password" placeholder="Passcode">
+    <button id="unlockBtn">Unlock</button>
+    <div id="lockError"></div>
+  </div>
+  <div id="appMain">
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">📋</div>
+        <div class="brand-name">Clipboard Pro — Floating</div>
+        <div id="syncBadge">☁</div>
+      </div>
+      <input id="search" type="text" placeholder="Search clips..." autofocus>
+    </div>
+    <div id="list"></div>
+    <div id="empty">✨ History khaali hai</div>
+    <div class="footer">
+      <button id="clear">🗑 Clear</button>
+      <button id="floatBtn" style="display:none">🪟</button>
+      <button id="lockBtn">🔒</button>
+      <button id="options">⚙</button>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
