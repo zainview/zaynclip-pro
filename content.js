@@ -2,9 +2,10 @@ let snippets = [];
 let expanderOn = true;
 let lastEditable = null;
 let widgetEl = null;
-let lastSaved = "";          // last clip humne save kiya (duplicate rokne ke liye)
+let lastSaved = "";
 let lastSavedAt = 0;
-let selectionText = "";      // abhi jo select hua hai uska text
+let selectionText = "";
+let lastLinkUrl = "";        // last right-clicked link ka URL
 
 async function loadSettings() {
   const d = await chrome.storage.local.get(["snippets", "settings"]);
@@ -19,20 +20,19 @@ chrome.storage.onChanged.addListener((ch, area) => {
 function saveClip(text) {
   text = (text || "").trim();
   if (!text) return;
-  // 3 second ke andar same text dobara save mat karo
   if (text === lastSaved && Date.now() - lastSavedAt < 3000) return;
   lastSaved = text;
   lastSavedAt = Date.now();
   chrome.runtime.sendMessage({ type: "SAVE_CLIP", text });
 }
 
-// ===== 1) NORMAL COPY EVENT (Ctrl+C, right-click copy) =====
+// ===== 1) NORMAL COPY EVENT (Ctrl+C, right-click → Copy) =====
 document.addEventListener("copy", () => {
   const text = window.getSelection()?.toString();
   if (text) saveClip(text);
 }, true);
 
-// ===== 2) SELECTION TRACK (Opera mini-popup ke liye) =====
+// ===== 2) SELECTION TRACK (Opera mini-popup fallback) =====
 document.addEventListener("mouseup", () => {
   setTimeout(() => {
     const t = window.getSelection()?.toString();
@@ -45,25 +45,41 @@ document.addEventListener("selectionchange", () => {
   if (t && t.trim()) selectionText = t;
 });
 
-// ===== 3) OPERA MINI-POPUP FALLBACK =====
-// Opera ke snapshot popup se copy karne par "copy" event fire nahi hota,
-// lekin clipboard ka content badal jata hai. Isliye jab mouse se selection
-// ban chuki ho aur clipboard badle, to check karo ki kya clipboard ka text
-// wahi hai jo select kiya tha.
+// ===== 3) LINK TRACK (right-click "Copy link address" ke liye) =====
+document.addEventListener("contextmenu", (e) => {
+  const a = e.target.closest?.("a[href]");
+  if (a) lastLinkUrl = a.href;
+}, true);
+
+// ===== 4) CLIPBOARD POLLING — Opera popup + links + address bar URL =====
+// Sirf tab save karta hai jab clipboard ka content in mein se kisi ek se
+// match kare: (a) aapki selection, (b) right-click kiya hua link,
+// (c) current page ka URL. Random clipboard data kabhi save nahi hota.
+function expectedTexts() {
+  const out = [];
+  if (selectionText && selectionText.trim()) out.push(selectionText.trim());
+  if (lastLinkUrl) out.push(lastLinkUrl);
+  try {
+    const href = location.href;
+    if (href && !/^(chrome|opera|about|edge|brave|vivaldi):/.test(href)) out.push(href);
+  } catch (e) {}
+  return out;
+}
+
 let lastClipCheck = "";
 setInterval(async () => {
-  if (!selectionText || !selectionText.trim()) return;
+  const expected = expectedTexts();
+  if (!expected.length) return;
   try {
     const text = await navigator.clipboard.readText();
     if (!text || text === lastClipCheck) return;
-    // Sirf tab save karo jab clipboard text selection se match kare
-    // (taaki doosri apps ki cheezein accidentally save na hon)
-    if (text.trim() === selectionText.trim()) {
+    const t = text.trim();
+    if (expected.includes(t)) {
       lastClipCheck = text;
       saveClip(text);
     }
   } catch (e) {
-    // permission nahi mili / page focused nahi — ignore
+    // page focused nahi / permission nahi — ignore
   }
 }, 800);
 
