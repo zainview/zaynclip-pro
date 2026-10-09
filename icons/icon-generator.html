@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ZaynClip Pro — Icon Generator</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(160deg, #070a14, #0d1226);
+    color: #e6edf7;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; padding: 40px; gap: 24px;
+  }
+  h1 {
+    background: linear-gradient(90deg, #00e5ff, #8b5cf6);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .previews { display: flex; gap: 28px; align-items: flex-end; }
+  .pv { text-align: center; color: #5a6b8a; font-size: 12px; }
+  .pv canvas { border-radius: 10px; box-shadow: 0 0 24px rgba(0,229,255,0.25); }
+  button {
+    background: linear-gradient(135deg, #00e5ff, #8b5cf6);
+    border: none; color: #fff; padding: 13px 30px; border-radius: 12px;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,229,255,0.35);
+  }
+  button:hover { transform: translateY(-2px); }
+</style>
+</head>
+<body>
+  <h1>⚡ ZaynClip Pro — Icon Generator</h1>
+  <div class="previews" id="previews"></div>
+  <button onclick="downloadAll()">⬇ Download All Icons (PNG)</button>
+
+<script>
+function roundRect(x, px, py, w, h, r) {
+  x.beginPath();
+  x.moveTo(px + r, py);
+  x.arcTo(px + w, py, px + w, py + h, r);
+  x.arcTo(px + w, py + h, px, py + h, r);
+  x.arcTo(px, py + h, px, py, r);
+  x.arcTo(px, py, px + w, py, r);
+  x.closePath();
+}
+
+function drawIcon(size) {
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const x = c.getContext("2d");
+  const s = size / 128;
+
+  // Dark space background
+  const bg = x.createLinearGradient(0, 0, size, size);
+  bg.addColorStop(0, "#0a0e1a");
+  bg.addColorStop(1, "#182048");
+  roundRect(x, 0, 0, size, size, 26 * s);
+  x.fillStyle = bg;
+  x.fill();
+
+  // Neon gradient (cyan → violet)
+  const grad = x.createLinearGradient(20 * s, 20 * s, 108 * s, 108 * s);
+  grad.addColorStop(0, "#00e5ff");
+  grad.addColorStop(1, "#8b5cf6");
+
+  // Clipboard body with glow
+  x.shadowColor = "rgba(0,229,255,0.8)";
+  x.shadowBlur = 10 * s;
+  x.strokeStyle = grad;
+  x.lineWidth = 7 * s;
+  roundRect(x, 32 * s, 28 * s, 64 * s, 80 * s, 12 * s);
+  x.stroke();
+
+  // Clip on top
+  x.shadowBlur = 8 * s;
+  x.fillStyle = grad;
+  roundRect(x, 50 * s, 18 * s, 28 * s, 16 * s, 8 * s);
+  x.fill();
+
+  // "Z" bolt inside (Zayn!)
+  x.shadowColor = "rgba(139,92,246,0.9)";
+  x.shadowBlur = 10 * s;
+  x.lineWidth = 9 * s;
+  x.lineCap = "round";
+  x.lineJoin = "round";
+  x.beginPath();
+  x.moveTo(50 * s, 56 * s);
+  x.lineTo(78 * s, 56 * s);
+  x.lineTo(50 * s, 86 * s);
+  x.lineTo(78 * s, 86 * s);
+  x.stroke();
+
+  return c;
+}
+
+const sizes = [128, 48, 16];
+const previews = document.getElementById("previews");
+for (const size of sizes) {
+  const c = drawIcon(size);
+  const wrap = document.createElement("div");
+  wrap.className = "pv";
+  const shown = document.createElement("canvas");
+  shown.width = shown.height = Math.max(size, 64);
+  shown.getContext("2d").drawImage(c, 0, 0, shown.width, shown.height);
+  wrap.appendChild(shown);
+  wrap.appendChild(document.createTextNode(size + "×" + size));
+  previews.appendChild(wrap);
+}
+
+function downloadAll() {
+  for (const size of sizes) {
+    const c = drawIcon(size);
+    const a = document.createElement("a");
+    a.href = c.toDataURL("image/png");
+    a.download = "icon" + size + ".png";
+    a.click();
+  }
+}
+</script>
+</body>
+</html>
