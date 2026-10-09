@@ -8,7 +8,7 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-"permissions": ["storage", "unlimitedStorage", "contextMenus", "clipboardWrite", "clipboardRead"],
+  "permissions": ["storage", "unlimitedStorage", "contextMenus", "clipboardWrite", "clipboardRead"],
   "background": { "service_worker": "background.js" },
   "action": {
     "default_popup": "popup.html",
@@ -37,22 +37,12 @@
       "suggested_key": { "default": "Alt+Shift+C" },
       "description": "Toggle on-page clipboard widget"
     },
-    "paste-fav-1": {
-      "suggested_key": { "default": "Alt+Shift+1" },
-      "description": "Paste pinned clip #1"
-    },
-    "paste-fav-2": {
-      "suggested_key": { "default": "Alt+Shift+2" },
-      "description": "Paste pinned clip #2"
-    },
+    "paste-fav-1": { "description": "Paste pinned clip #1" },
+    "paste-fav-2": { "description": "Paste pinned clip #2" },
     "paste-fav-3": { "description": "Paste pinned clip #3" },
     "paste-fav-4": { "description": "Paste pinned clip #4" },
     "paste-fav-5": { "description": "Paste pinned clip #5" },
     "floatingMode": { "description": "Open floating mode window" },
-        "copyPageUrl": {
-      "suggested_key": { "default": "Alt+Shift+U" },
-      "description": "Save current page URL"
-    },
     "lockNow": { "description": "Lock clipboard now" }
   }
 }
