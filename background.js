@@ -134,7 +134,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "save-pin",
-    title: "Clipboard Pro mein pin karo",
+    title: "Pin to ZaynClip Pro",
     contexts: ["selection"]
   });
   importSync();
