@@ -11,7 +11,7 @@ async function isUnlocked() {
   return !!unlocked;
 }
 
-// ===== 1) UNLIMITED HISTORY =====
+// ===== UNLIMITED HISTORY =====
 async function addClip(text, pinned = false) {
   text = (text || "").trim();
   if (!text) return;
@@ -33,7 +33,16 @@ async function addClip(text, pinned = false) {
   scheduleSync();
 }
 
-// ===== 2) CLOUD SYNC (pinned clips + snippets, aapke Google account se) =====
+// ===== GREEN ✓ BADGE (save confirmation) =====
+function flashBadge() {
+  try {
+    chrome.action.setBadgeText({ text: "✓" });
+    chrome.action.setBadgeBackgroundColor({ color: "#34d399" });
+    setTimeout(() => chrome.action.setBadgeText({ text: "" }), 1500);
+  } catch (e) {}
+}
+
+// ===== CLOUD SYNC (pinned clips + snippets) =====
 let syncTimer = null;
 function scheduleSync() {
   clearTimeout(syncTimer);
@@ -78,10 +87,10 @@ async function importSync() {
 
 chrome.runtime.onStartup.addListener(importSync);
 chrome.storage.onChanged.addListener((ch, area) => {
-  if (area === "sync" && ch.syncData) importSync(); // doosre device se aaya data
+  if (area === "sync" && ch.syncData) importSync();
 });
 
-// ===== 3) FLOATING MODE =====
+// ===== FLOATING MODE =====
 let floatWinId = null;
 async function openFloating() {
   if (floatWinId != null) {
@@ -130,27 +139,58 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   return true;
 });
 
-// ===== CONTEXT MENU =====
+// ===== CONTEXT MENUS (selection + link + page URL) =====
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "save-pin",
     title: "Pin to ZaynClip Pro",
     contexts: ["selection"]
   });
+  chrome.contextMenus.create({
+    id: "save-link",
+    title: "Save link URL to ZaynClip Pro",
+    contexts: ["link"]
+  });
+  chrome.contextMenus.create({
+    id: "save-page",
+    title: "Save page URL to ZaynClip Pro",
+    contexts: ["page"]
+  });
   importSync();
 });
-chrome.contextMenus.onClicked.addListener((info) => {
+
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "save-pin" && info.selectionText) {
-    addClip(info.selectionText, true);
+    await addClip(info.selectionText, true);
+    flashBadge();
+  }
+  if (info.menuItemId === "save-link" && info.linkUrl) {
+    await addClip(info.linkUrl, true);
+    flashBadge();
+  }
+  if (info.menuItemId === "save-page") {
+    const url = info.pageUrl || tab?.url;
+    if (url) {
+      await addClip(url, true);
+      flashBadge();
+    }
   }
 });
 
-// ===== 5) ADVANCED SHORTCUTS =====
+// ===== ADVANCED SHORTCUTS =====
 chrome.commands.onCommand.addListener(async (command) => {
   if (command === "floatingMode") { openFloating(); return; }
   if (command === "lockNow") { await chrome.storage.session.remove("unlocked"); return; }
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  if (command === "copyPageUrl") {
+    if (tab?.url) {
+      await addClip(tab.url, true);
+      flashBadge();
+    }
+    return;
+  }
 
   if (command === "toggleWidget") {
     if (tab?.id) chrome.tabs.sendMessage(tab.id, { type: "WIDGET_TOGGLE" });
@@ -159,7 +199,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 
   if (command.startsWith("paste-fav-")) {
     const { clips = [], settings = {} } = await g(["clips", "settings"]);
-    if (settings.passHash && !(await isUnlocked())) return; // locked = no paste
+    if (settings.passHash && !(await isUnlocked())) return;
     const idx = parseInt(command.split("-").pop(), 10) - 1;
     const favs = clips.filter((c) => c.pinned);
     if (!favs[idx] || !tab?.id) return;
