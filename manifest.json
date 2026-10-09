@@ -49,6 +49,10 @@
     "paste-fav-4": { "description": "Paste pinned clip #4" },
     "paste-fav-5": { "description": "Paste pinned clip #5" },
     "floatingMode": { "description": "Open floating mode window" },
+        "copyPageUrl": {
+      "suggested_key": { "default": "Alt+Shift+U" },
+      "description": "Save current page URL"
+    },
     "lockNow": { "description": "Lock clipboard now" }
   }
 }
