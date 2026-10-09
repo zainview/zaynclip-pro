@@ -154,9 +154,9 @@ async function toggleWidget() {
   shadow.querySelector(".close").onclick = () => toggleWidget();
 
   if (locked) {
-    itemsEl.innerHTML = `<div class="empty">🔒 Locked — pehle popup mein unlock karein</div>`;
+    itemsEl.innerHTML = `<div class="empty">🔒 Locked — unlock from the popup first</div>`;
   } else if (!clips.length) {
-    itemsEl.innerHTML = `<div class="empty">History khaali hai</div>`;
+    itemsEl.innerHTML = `<div class="empty">No clips yet</div>`;
   } else {
     clips.slice(0, 40).forEach((c) => {
       const d = document.createElement("div");
