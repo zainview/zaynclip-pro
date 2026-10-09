@@ -6,12 +6,12 @@ let clips = [];
 
 function timeAgo(t) {
   const s = Math.floor((Date.now() - t) / 1000);
-  if (s < 60) return "abhi";
+  if (s < 60) return "just now";
   const m = Math.floor(s / 60);
   if (m < 60) return m + " min";
   const h = Math.floor(m / 60);
   if (h < 24) return h + " hr";
-  return Math.floor(h / 24) + " din";
+  return Math.floor(h / 24) + " d";
 }
 
 // ===== LOCK =====
@@ -34,7 +34,7 @@ async function tryUnlock() {
     document.getElementById("appMain").style.display = "block";
     load();
   } else {
-    document.getElementById("lockError").textContent = "Galat passcode!";
+    document.getElementById("lockError").textContent = "Wrong passcode!";
     document.getElementById("lockPass").value = "";
   }
 }
@@ -115,7 +115,7 @@ chrome.storage.onChanged.addListener((ch, area) => {
 
 // ===== FOOTER =====
 document.getElementById("clear").onclick = async () => {
-  if (confirm("Saare unpinned clips delete karein?")) {
+  if (confirm("Delete all unpinned clips?")) {
     clips = clips.filter((c) => c.pinned);
     await chrome.storage.local.set({ clips });
   }
