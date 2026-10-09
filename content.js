@@ -2,6 +2,9 @@ let snippets = [];
 let expanderOn = true;
 let lastEditable = null;
 let widgetEl = null;
+let lastSaved = "";          // last clip humne save kiya (duplicate rokne ke liye)
+let lastSavedAt = 0;
+let selectionText = "";      // abhi jo select hua hai uska text
 
 async function loadSettings() {
   const d = await chrome.storage.local.get(["snippets", "settings"]);
@@ -13,13 +16,56 @@ chrome.storage.onChanged.addListener((ch, area) => {
   if (area === "local" && (ch.snippets || ch.settings)) loadSettings();
 });
 
-// ===== COPY CAPTURE =====
+function saveClip(text) {
+  text = (text || "").trim();
+  if (!text) return;
+  // 3 second ke andar same text dobara save mat karo
+  if (text === lastSaved && Date.now() - lastSavedAt < 3000) return;
+  lastSaved = text;
+  lastSavedAt = Date.now();
+  chrome.runtime.sendMessage({ type: "SAVE_CLIP", text });
+}
+
+// ===== 1) NORMAL COPY EVENT (Ctrl+C, right-click copy) =====
 document.addEventListener("copy", () => {
   const text = window.getSelection()?.toString();
-  if (text && text.trim()) {
-    chrome.runtime.sendMessage({ type: "SAVE_CLIP", text });
-  }
+  if (text) saveClip(text);
 }, true);
+
+// ===== 2) SELECTION TRACK (Opera mini-popup ke liye) =====
+document.addEventListener("mouseup", () => {
+  setTimeout(() => {
+    const t = window.getSelection()?.toString();
+    if (t && t.trim()) selectionText = t;
+  }, 10);
+}, true);
+
+document.addEventListener("selectionchange", () => {
+  const t = window.getSelection()?.toString();
+  if (t && t.trim()) selectionText = t;
+});
+
+// ===== 3) OPERA MINI-POPUP FALLBACK =====
+// Opera ke snapshot popup se copy karne par "copy" event fire nahi hota,
+// lekin clipboard ka content badal jata hai. Isliye jab mouse se selection
+// ban chuki ho aur clipboard badle, to check karo ki kya clipboard ka text
+// wahi hai jo select kiya tha.
+let lastClipCheck = "";
+setInterval(async () => {
+  if (!selectionText || !selectionText.trim()) return;
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text || text === lastClipCheck) return;
+    // Sirf tab save karo jab clipboard text selection se match kare
+    // (taaki doosri apps ki cheezein accidentally save na hon)
+    if (text.trim() === selectionText.trim()) {
+      lastClipCheck = text;
+      saveClip(text);
+    }
+  } catch (e) {
+    // permission nahi mili / page focused nahi — ignore
+  }
+}, 800);
 
 // ===== TEXT EXPANDER =====
 function findMatch(beforeCaret) {
@@ -77,7 +123,7 @@ document.addEventListener("input", (e) => {
   }
 }, true);
 
-// ===== FOCUS TRACK (widget paste ke liye) =====
+// ===== FOCUS TRACK =====
 document.addEventListener("focusin", (e) => {
   const el = e.target;
   if (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable) {
@@ -101,7 +147,7 @@ function insertInto(el, text) {
   }
 }
 
-// ===== 4) ON-PAGE WIDGET (Alt+Shift+C) =====
+// ===== ON-PAGE WIDGET (Alt+Shift+C) =====
 async function toggleWidget() {
   if (widgetEl) { widgetEl.remove(); widgetEl = null; return; }
 
@@ -146,7 +192,7 @@ async function toggleWidget() {
     .empty { padding: 26px; text-align: center; color: #5a6b8a; font-size: 12px; }
   </style>
   <div class="panel">
-    <div class="head"><span>⚡ CLIPBOARD PRO</span><span class="close">✕</span></div>
+    <div class="head"><span>⚡ ZAYNCLIP PRO</span><span class="close">✕</span></div>
     <div class="items"></div>
   </div>`;
 
@@ -180,7 +226,7 @@ async function toggleWidget() {
 // ===== MESSAGE HANDLER =====
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === "WIDGET_TOGGLE") {
-    if (window.top === window.self) toggleWidget(); // sirf top frame mein
+    if (window.top === window.self) toggleWidget();
   }
   if (msg.type === "INSERT_TEXT") {
     if (!document.hasFocus()) return;
