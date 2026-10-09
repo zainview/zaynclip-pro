@@ -34,10 +34,7 @@
     }
     @keyframes shine { to { background-position: 200% center; } }
     .sub { color: var(--dim); font-size: 13px; margin-bottom: 10px; }
-    h2 {
-      font-size: 15px; font-weight: 700; margin: 34px 0 12px;
-      display: flex; align-items: center; gap: 10px;
-    }
+    h2 { font-size: 15px; font-weight: 700; margin: 34px 0 12px; display: flex; align-items: center; gap: 10px; }
     h2::before {
       content: ''; width: 4px; height: 16px; border-radius: 4px;
       background: var(--grad);
@@ -49,7 +46,7 @@
       border-radius: 16px; padding: 18px;
       backdrop-filter: blur(12px);
     }
-    .row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+    .row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
     input, textarea {
       background: rgba(255,255,255,0.05);
       border: 1px solid var(--line);
@@ -69,7 +66,6 @@
       cursor: pointer; font-family: inherit; font-size: 14px;
       box-shadow: 0 4px 14px rgba(0,229,255,0.22);
       transition: all 0.18s;
-      white-space: nowrap;
     }
     button:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(139,92,246,0.4); }
     button.ghost {
@@ -91,7 +87,7 @@
       border-radius: 12px;
     }
     .snip-item b.key { color: var(--cyan); min-width: 90px; width: auto; }
-    .snip-item .val { color: var(--muted); font-size: 13px; word-break: break-word; }
+    .snip-item .val { color: var(--muted); font-size: 13px; }
     .snip-item .del { padding: 6px 12px; font-size: 12px; }
     #toast {
       position: fixed; bottom: 24px; left: 50%;
@@ -117,40 +113,40 @@
       <textarea id="newVal" class="val" rows="2" placeholder="The full text to expand"></textarea>
       <button id="addSnip">Add</button>
     </div>
-    <div class="hint">Type the key in any text field on any website → it expands automatically.</div>
+    <div class="hint">Type the key in any text field → it expands automatically.</div>
   </div>
 
   <h2>General Settings</h2>
   <div class="card">
-    <label><input type="checkbox" id="expanderOn" checked> Enable text expander</label>
-    <label>Max history items (0 = UNLIMITED): <input id="maxClips" type="number" value="0" min="0" style="width:90px"></label>
+    <label><input type="checkbox" id="expanderOn" checked> Text expander ON</label>
+    <label>Max history items (0 = UNLIMITED): <input id="maxClips" type="number" value="0" style="width:90px"></label>
     <button id="saveSettings">Save Settings</button>
   </div>
 
   <h2>Cloud Sync</h2>
   <div class="card">
-    <label><input type="checkbox" id="syncOn"> Enable sync (pinned clips + snippets via your Google account)</label>
-    <div class="hint">Auto-imports on other PCs signed into the same Google account. Only pinned clips + snippets sync — your local history always stays local.</div>
+    <label><input type="checkbox" id="syncOn"> Sync ON (pinned clips + snippets, via your Google account)</label>
+    <div class="hint">Auto-imports on other PCs signed into the same account. Only pinned clips + snippets sync — local history stays local.</div>
   </div>
 
   <h2>Security — Password Lock</h2>
   <div class="card">
     <div id="passStatus" style="margin-bottom:10px;font-size:13px;color:var(--muted)"></div>
     <div class="row">
-      <input id="passInput" type="password" class="val" placeholder="New passcode (min 4 characters)">
+      <input id="passInput" type="password" class="val" placeholder="New passcode (min 4 chars)">
       <button id="setPass">Set Passcode</button>
       <button id="removePass" class="danger">Remove</button>
     </div>
-    <div class="hint">Auto-locks on browser restart. Only the SHA-256 hash is stored — never your password.</div>
+    <div class="hint">Auto-locks on browser restart. Only the SHA-256 hash is stored — never the password.</div>
   </div>
 
-  <h2>Keyboard Shortcuts</h2>
+  <h2>Advanced Shortcuts</h2>
   <div class="card">
     <div style="font-size:13px;line-height:2.1;color:var(--muted)">
-      <b style="color:var(--cyan)">Alt+Shift+V</b> — Open popup &nbsp;|&nbsp;
-      <b style="color:var(--cyan)">Alt+Shift+C</b> — Toggle widget &nbsp;|&nbsp;
-      <b style="color:var(--cyan)">Alt+Shift+1/2</b> — Paste pinned clip<br>
-      Floating Mode, Lock Now &amp; Fav 3–5: assign them at <b style="color:#a78bfa">chrome://extensions/shortcuts</b>
+      <b style="color:var(--cyan)">Alt+Shift+V</b> — Popup &nbsp;|&nbsp;
+      <b style="color:var(--cyan)">Alt+Shift+C</b> — Widget &nbsp;|&nbsp;
+      <b style="color:var(--cyan)">Alt+Shift+1/2</b> — Paste pinned<br>
+      Floating, Lock, Fav 3–5: assign at <b style="color:#a78bfa">chrome://extensions/shortcuts</b>
     </div>
     <button id="floatOpen" class="ghost" style="margin-top:12px">🪟 Open Floating Mode</button>
   </div>
@@ -161,9 +157,9 @@
       <button id="exportBtn">⬇ Export JSON</button>
       <button id="importBtn" class="ghost">⬆ Import JSON</button>
       <input type="file" id="importFile" accept=".json" style="display:none">
-      <button id="wipeBtn" class="danger">🗑 Wipe All Data</button>
+      <button id="wipeBtn" class="danger">🗑 Wipe All</button>
     </div>
-    <div class="hint">The passcode hash is never included in exports (security).</div>
+    <div class="hint">Import supports ZaynClip backups AND other extensions like <b>Clipboard History Manager</b> — format is auto-detected &amp; converted. Existing clips are never deleted (merged + deduplicated).</div>
   </div>
 
   <div id="toast"></div>
