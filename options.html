@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Clipboard Pro — Control Panel</title>
+  <title>ZaynClip Pro — Control Panel</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -69,6 +69,7 @@
       cursor: pointer; font-family: inherit; font-size: 14px;
       box-shadow: 0 4px 14px rgba(0,229,255,0.22);
       transition: all 0.18s;
+      white-space: nowrap;
     }
     button:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(139,92,246,0.4); }
     button.ghost {
@@ -90,7 +91,7 @@
       border-radius: 12px;
     }
     .snip-item b.key { color: var(--cyan); min-width: 90px; width: auto; }
-    .snip-item .val { color: var(--muted); font-size: 13px; }
+    .snip-item .val { color: var(--muted); font-size: 13px; word-break: break-word; }
     .snip-item .del { padding: 6px 12px; font-size: 12px; }
     #toast {
       position: fixed; bottom: 24px; left: 50%;
@@ -105,53 +106,53 @@
   </style>
 </head>
 <body>
-  <h1>⚡ Clipboard Pro</h1>
-  <div class="sub">Full Control Panel — saara data aapke browser mein, koi server nahi.</div>
+  <h1>⚡ ZaynClip Pro</h1>
+  <div class="sub">Full Control Panel — all data stays in your browser. No servers, no tracking.</div>
 
   <h2>Text Expander Snippets</h2>
   <div class="card">
     <div id="snipList"></div>
     <div class="row">
       <input id="newKey" class="key" placeholder=";sig">
-      <textarea id="newVal" class="val" rows="2" placeholder="Poora text jo expand hoga"></textarea>
+      <textarea id="newVal" class="val" rows="2" placeholder="The full text to expand"></textarea>
       <button id="addSnip">Add</button>
     </div>
-    <div class="hint">Kisi bhi text field mein key type karein → auto expand.</div>
+    <div class="hint">Type the key in any text field on any website → it expands automatically.</div>
   </div>
 
   <h2>General Settings</h2>
   <div class="card">
-    <label><input type="checkbox" id="expanderOn" checked> Text expander ON</label>
-    <label>Max history items (0 = UNLIMITED): <input id="maxClips" type="number" value="0" style="width:90px"></label>
+    <label><input type="checkbox" id="expanderOn" checked> Enable text expander</label>
+    <label>Max history items (0 = UNLIMITED): <input id="maxClips" type="number" value="0" min="0" style="width:90px"></label>
     <button id="saveSettings">Save Settings</button>
   </div>
 
   <h2>Cloud Sync</h2>
   <div class="card">
-    <label><input type="checkbox" id="syncOn"> Sync ON (pinned clips + snippets, aapke Google account se)</label>
-    <div class="hint">Doosre PC ke Chrome mein same account se auto-import hoga. Local history sync nahi hoti — sirf pinned + snippets.</div>
+    <label><input type="checkbox" id="syncOn"> Enable sync (pinned clips + snippets via your Google account)</label>
+    <div class="hint">Auto-imports on other PCs signed into the same Google account. Only pinned clips + snippets sync — your local history always stays local.</div>
   </div>
 
   <h2>Security — Password Lock</h2>
   <div class="card">
     <div id="passStatus" style="margin-bottom:10px;font-size:13px;color:var(--muted)"></div>
     <div class="row">
-      <input id="passInput" type="password" class="val" placeholder="Naya passcode (min 4 chars)">
+      <input id="passInput" type="password" class="val" placeholder="New passcode (min 4 characters)">
       <button id="setPass">Set Passcode</button>
       <button id="removePass" class="danger">Remove</button>
     </div>
-    <div class="hint">Browser restart par auto-lock. SHA-256 hash store hota hai, password nahi.</div>
+    <div class="hint">Auto-locks on browser restart. Only the SHA-256 hash is stored — never your password.</div>
   </div>
 
-  <h2>Advanced Shortcuts</h2>
+  <h2>Keyboard Shortcuts</h2>
   <div class="card">
     <div style="font-size:13px;line-height:2.1;color:var(--muted)">
-      <b style="color:var(--cyan)">Alt+Shift+V</b> — Popup &nbsp;|&nbsp;
-      <b style="color:var(--cyan)">Alt+Shift+C</b> — Widget &nbsp;|&nbsp;
-      <b style="color:var(--cyan)">Alt+Shift+1/2</b> — Paste pinned<br>
-      Floating, Lock, Fav 3–5: <b style="color:#a78bfa">chrome://extensions/shortcuts</b> par assign karein
+      <b style="color:var(--cyan)">Alt+Shift+V</b> — Open popup &nbsp;|&nbsp;
+      <b style="color:var(--cyan)">Alt+Shift+C</b> — Toggle widget &nbsp;|&nbsp;
+      <b style="color:var(--cyan)">Alt+Shift+1/2</b> — Paste pinned clip<br>
+      Floating Mode, Lock Now &amp; Fav 3–5: assign them at <b style="color:#a78bfa">chrome://extensions/shortcuts</b>
     </div>
-    <button id="floatOpen" class="ghost" style="margin-top:12px">🪟 Floating Mode Kholein</button>
+    <button id="floatOpen" class="ghost" style="margin-top:12px">🪟 Open Floating Mode</button>
   </div>
 
   <h2>Backup — Full Control</h2>
@@ -160,9 +161,9 @@
       <button id="exportBtn">⬇ Export JSON</button>
       <button id="importBtn" class="ghost">⬆ Import JSON</button>
       <input type="file" id="importFile" accept=".json" style="display:none">
-      <button id="wipeBtn" class="danger">🗑 Sab Delete</button>
+      <button id="wipeBtn" class="danger">🗑 Wipe All Data</button>
     </div>
-    <div class="hint">Export mein passcode hash shamil nahi hota (security).</div>
+    <div class="hint">The passcode hash is never included in exports (security).</div>
   </div>
 
   <div id="toast"></div>
